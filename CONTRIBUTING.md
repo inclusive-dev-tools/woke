@@ -61,4 +61,4 @@ Because your team is collaborating on a FORK of a repo into which you will event
 * having a workspace for the team to collaborate on in-progress work in compliance with our self-managed engineering processes that is separate from the original/source OSS repo (your fork)
 * having a workspace that supports easy contribution of approved work back to the original/source OSS repo in a manner that doesn't negatively impact the commit history, etc. of the original/source repo.
 
-If your team is collaborating and contributing to woke, you can use the below documented workflow to handle issue types, merging and PRs between your forked repository and woke repository. [proposedforkflow.png] 
+If your team is collaborating and contributing to woke, you can use the below documented workflow to handle issue types, merging and PRs between your forked repository and woke repository. ![alt text](proposedforkflow.png)
