@@ -52,3 +52,13 @@ Some things that will increase the chance that your pull request is accepted:
 * Write good tests, CI will tell if if your PR reduced the overall code coverage.
 * Follow Go's [style guide](https://golang.org/doc/effective_go.html).
 * Write a [good commit message](http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html).
+
+
+
+## Proposed Interaction Model 
+
+Because your team is collaborating on a FORK of a repo into which you will eventually seek to merge contributions, special care must be taken for your team to operate in a way that is amenable each of the following objectives:
+* having a workspace for the team to collaborate on in-progress work in compliance with our self-managed engineering processes that is separate from the original/source OSS repo (your fork)
+* having a workspace that supports easy contribution of approved work back to the original/source OSS repo in a manner that doesn't negatively impact the commit history, etc. of the original/source repo.
+
+If your team is collaborating and contributing to woke, you can use the below documented workflow to handle issue types, merging and PRs between your forked repository and woke repository. [proposedforkflow.png] 
