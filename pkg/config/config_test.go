@@ -42,12 +42,14 @@ func TestNewConfig(t *testing.T) {
 			enabledRules[i] = fmt.Sprintf("%q", c.Rules[i].Name)
 		}
 
+		loadedRemoteConfigMsg := `{"level":"debug","filename":"testdata/good.yaml","message":"Adding custom ruleset from"}`
+		loadedRemoteConfig := `{"level":"debug","filename":"testdata/good.yaml","message":"Adding custom ruleset from"}`
 		loadedConfigMsg := `{"level":"debug","config":"testdata/good.yaml","message":"loaded config file"}`
 		configRulesMsg := fmt.Sprintf(`{"level":"debug","rules":[%s],"message":"config rules"}`, strings.Join(configRules, ","))
 		defaultRulesMsg := fmt.Sprintf(`{"level":"debug","rules":[%s],"message":"default rules"}`, strings.Join(defaultRules, ","))
 		allRulesMsg := fmt.Sprintf(`{"level":"debug","rules":[%s],"message":"all enabled rules"}`, strings.Join(enabledRules, ","))
 		assert.Equal(t,
-			loadedConfigMsg+"\n"+configRulesMsg+"\n"+defaultRulesMsg+"\n"+allRulesMsg+"\n",
+			loadedRemoteConfigMsg+"\n"+loadedRemoteConfig+"\n"+loadedConfigMsg+"\n"+configRulesMsg+"\n"+defaultRulesMsg+"\n"+allRulesMsg+"\n",
 			out.String())
 	})
 
@@ -205,6 +207,61 @@ func TestNewConfig(t *testing.T) {
 
 		assert.EqualValues(t, expected.Rules, c.Rules)
 		assert.Equal(t, "No findings found.", c.GetSuccessExitMessage())
+	})
+}
+
+func Test_LoadConfig(t *testing.T) {
+	t.Run("valid-url", func(t *testing.T) {
+		c, err := loadConfig("https://raw.githubusercontent.com/get-woke/woke/main/example.yaml")
+		assert.NoError(t, err)
+		assert.NotNil(t, c)
+		// delete downloaded file after successful test
+		os.Remove("downloadedRules.yaml")
+	})
+
+	t.Run("invalid-url", func(t *testing.T) {})
+	_, err := loadConfig("https://raw.githubusercontent.com/get-woke/woke/main/example")
+	assert.Error(t, err)
+}
+
+func Test_isValidURL(t *testing.T) {
+	t.Run("valid-url", func(t *testing.T) {
+		boolResponse := isValidURL("https://raw.githubusercontent.com/get-woke/woke/main/example.yaml")
+		assert.True(t, boolResponse)
+	})
+
+	t.Run("invalid-url", func(t *testing.T) {
+		boolResponse := isValidURL("Users/Document/test.yaml")
+		assert.False(t, boolResponse)
+	})
+
+	t.Run("invalid-url", func(t *testing.T) {
+		boolResponse := isValidURL("/Users/Document/test.yaml")
+		assert.False(t, boolResponse)
+	})
+
+	t.Run("invalid-url", func(t *testing.T) {
+		boolResponse := isValidURL("C:User\testpath\test.yaml")
+		assert.False(t, boolResponse)
+	})
+
+	t.Run("invalid-url", func(t *testing.T) {
+		boolResponse := isValidURL("C:\\directory.com\test.yaml")
+		assert.False(t, boolResponse)
+	})
+}
+
+func Test_DownloadFile(t *testing.T) {
+	t.Run("valid-url", func(t *testing.T) {
+		err := DownloadFile("DownloadedFile.yaml", "https://raw.githubusercontent.com/get-woke/woke/main/example.yaml")
+		assert.NoError(t, err)
+		// delete downloaded file after successful test
+		os.Remove("DownloadedFile.yaml")
+	})
+
+	t.Run("invalid-url", func(t *testing.T) {
+		err := DownloadFile("DownloadedFile.yaml", "https://raw.githubusercontent.com/get-woke/woke/main/example")
+		assert.Error(t, err)
 	})
 }
 
