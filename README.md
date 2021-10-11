@@ -1,4 +1,3 @@
-[![Board Status](https://dev.azure.com/csenyc/8d8e8fcd-f38a-47e9-ac77-557d6ef2fe88/ef901a18-7d6e-4e5d-a8f9-751e50e850c1/_apis/work/boardbadge/9ebd280a-68e8-449e-ac8a-d9423819a438)](https://dev.azure.com/csenyc/8d8e8fcd-f38a-47e9-ac77-557d6ef2fe88/_boards/board/t/ef901a18-7d6e-4e5d-a8f9-751e50e850c1/Microsoft.RequirementCategory)
 <p align="center">
   <a href="https://github.com/get-woke/woke">
     <img alt="woke logo" src="https://raw.githubusercontent.com/get-woke/woke/main/assets/default-monochrome.svg" height="80" />
