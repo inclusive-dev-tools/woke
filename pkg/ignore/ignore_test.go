@@ -106,9 +106,7 @@ func BenchmarkIgnore(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		var iFactory = &IgnoreFactory{
-			filepathAbs: filepath.Abs,
-		}
+		iFactory := NewIgnoreFactory()
 		ignorer, err := iFactory.NewIgnore(fs, []string{})
 		assert.NoError(b, err)
 		ignorer.Match(filepath.Join("not", "foo"), false)
