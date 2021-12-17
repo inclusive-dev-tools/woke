@@ -43,7 +43,8 @@ func testParser() (parser *Parser, err error) {
 		return
 	}
 	fs := osfs.New(cwd)
-	ignorer, err := ignore.NewIgnore(fs, []string{})
+	iFactory := ignore.NewIgnoreFactory()
+	ignorer, err := iFactory.NewIgnore(fs, []string{})
 	if err != nil {
 		return
 	}
@@ -149,7 +150,8 @@ func parsePathTests(t *testing.T) {
 		cwd, err := os.Getwd()
 		assert.NoError(t, err)
 		fs := osfs.New(cwd)
-		ignorer, err := ignore.NewIgnore(fs, []string{filepath.ToSlash(f.Name())})
+		iFactory := ignore.NewIgnoreFactory()
+		ignorer, err := iFactory.NewIgnore(fs, []string{filepath.ToSlash(f.Name())})
 		assert.NoError(t, err)
 		p.Ignorer = ignorer
 		pr := new(testPrinter)
@@ -193,7 +195,8 @@ func parsePathTests(t *testing.T) {
 		cwd, err := os.Getwd()
 		assert.NoError(t, err)
 		fs := osfs.New(cwd)
-		ignorer, err := ignore.NewIgnore(fs, []string{"*_test.go"})
+		iFactory := ignore.NewIgnoreFactory()
+		ignorer, err := iFactory.NewIgnore(fs, []string{"*_test.go"})
 		assert.NoError(t, err)
 		p.Ignorer = ignorer
 		pr := new(testPrinter)

@@ -1,6 +1,7 @@
 package ignore
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -20,7 +21,8 @@ func init() {
 
 type IgnoreTestSuite struct {
 	suite.Suite
-	GFS billy.Filesystem // git repository root
+	GFS     billy.Filesystem // git repository root
+	factory *IgnoreFactory
 }
 
 func TempFileSystem() (fs billy.Filesystem, clean func()) {
@@ -76,6 +78,7 @@ func (suite *IgnoreTestSuite) SetupTest() {
 	suite.NoError(err)
 
 	suite.GFS = fs
+	suite.factory = NewIgnoreFactory()
 }
 
 func BenchmarkIgnore(b *testing.B) {
@@ -103,7 +106,10 @@ func BenchmarkIgnore(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		ignorer, err := NewIgnore(fs, []string{})
+		var iFactory = &IgnoreFactory{
+			filepathAbs: filepath.Abs,
+		}
+		ignorer, err := iFactory.NewIgnore(fs, []string{})
 		assert.NoError(b, err)
 		ignorer.Match(filepath.Join("not", "foo"), false)
 	}
@@ -123,7 +129,7 @@ func (suite *IgnoreTestSuite) TestGetRootGitDir() {
 	cwd, err := os.Getwd()
 	suite.NoError(err)
 
-	rootFs, err := GetRootGitDir(cwd)
+	rootFs, err := suite.factory.GetRootGitDir(cwd)
 	suite.NoError(err)
 	suite.Equal(filepath.Dir(filepath.Dir(cwd)), rootFs.Root())
 }
@@ -131,12 +137,31 @@ func (suite *IgnoreTestSuite) TestGetRootGitDir() {
 func (suite *IgnoreTestSuite) TestGetRootGitDirNotExist() {
 	fs, clean := TempFileSystem()
 	defer clean()
-	rootFs, err := GetRootGitDir(fs.Root())
+	rootFs, err := suite.factory.GetRootGitDir(fs.Root())
 	suite.NoError(err)
 	suite.Equal(fs.Root(), rootFs.Root())
 }
+
+func (suite *IgnoreTestSuite) TestGetRootGitDirInvalid() {
+	defer func() {
+		suite.factory.filepathAbs = filepath.Abs
+	}()
+	suite.factory.filepathAbs = func(path string) (string, error) { return "", errors.New("test") }
+	_, err := suite.factory.GetRootGitDir("")
+	suite.Error(err)
+}
+
+func (suite *IgnoreTestSuite) TestNewIgnoreWithOSErr() {
+	defer func() {
+		suite.factory.osGetwd = os.Getwd
+	}()
+	suite.factory.osGetwd = func() (string, error) { return "", errors.New("test") }
+	_, err := suite.factory.NewIgnore(suite.GFS, []string{})
+	suite.Error(err)
+}
+
 func (suite *IgnoreTestSuite) TestIgnore_Match() {
-	i, err := NewIgnore(suite.GFS, []string{"my/files/*"})
+	i, err := suite.factory.NewIgnore(suite.GFS, []string{"my/files/*"})
 	suite.NoError(err)
 	suite.NotNil(i)
 
@@ -148,7 +173,7 @@ func (suite *IgnoreTestSuite) TestIgnore_Match() {
 // Test all default ignore files, except for .git/info/exclude, since
 // that uses a .git directory that we cannot check in.
 func (suite *IgnoreTestSuite) TestIgnoreDefaultIgoreFiles_Match() {
-	i, err := NewIgnore(suite.GFS, []string{"*.FROMARGUMENT"})
+	i, err := suite.factory.NewIgnore(suite.GFS, []string{"*.FROMARGUMENT"})
 	suite.NoError(err)
 	suite.NotNil(i)
 

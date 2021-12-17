@@ -19,11 +19,23 @@ type Ignore struct {
 	matcher gitignore.Matcher
 }
 
+type IgnoreFactory struct {
+	filepathAbs func(path string) (string, error)
+	osGetwd     func() (string, error)
+}
+
 var defaultIgnoreFiles = []string{
 	".gitignore",
 	".ignore",
 	".wokeignore",
 	".git/info/exclude",
+}
+
+func NewIgnoreFactory() (iFactory *IgnoreFactory) {
+	return &IgnoreFactory{
+		filepathAbs: filepath.Abs,
+		osGetwd:     os.Getwd,
+	}
 }
 
 // Given a workingDir (example: /root/proj/subDir/curDir)
@@ -44,10 +56,15 @@ func getDomainFromWorkingDir(workingDir, gitRoot string) []string {
 	return []string{}
 }
 
-func GetRootGitDir(workingDir string) (filesystem billy.Filesystem, err error) {
-	dir, err := filepath.Abs(workingDir)
+// var (
+// 	filepathAbs = filepath.Abs
+// 	osGetwd     = os.Getwd
+// )
+
+func (iFactory *IgnoreFactory) GetRootGitDir(workingDir string) (filesystem billy.Filesystem, err error) {
+	dir, err := iFactory.filepathAbs(workingDir)
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	for {
@@ -66,7 +83,7 @@ func GetRootGitDir(workingDir string) (filesystem billy.Filesystem, err error) {
 
 // NewIgnore produces an Ignore object, with compiled lines from defaultIgnoreFiles
 // which you can match files against
-func NewIgnore(filesystem billy.Filesystem, lines []string) (ignore *Ignore, err error) {
+func (iFactory *IgnoreFactory) NewIgnore(filesystem billy.Filesystem, lines []string) (ignore *Ignore, err error) {
 	start := time.Now()
 	defer func() {
 		log.Debug().
@@ -75,13 +92,13 @@ func NewIgnore(filesystem billy.Filesystem, lines []string) (ignore *Ignore, err
 	}()
 
 	var cwd string
-	if cwd, err = os.Getwd(); err != nil {
-		return
+	if cwd, err = iFactory.osGetwd(); err != nil {
+		return nil, err
 	}
 
 	var ps []gitignore.Pattern
 	if ps, err = gitignore.ReadPatterns(filesystem, nil, defaultIgnoreFiles); err != nil {
-		return
+		return nil, err
 	}
 
 	// get domain for git ignore rules supplied from the lines argument

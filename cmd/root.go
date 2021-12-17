@@ -101,15 +101,16 @@ func rootRunE(cmd *cobra.Command, args []string) error {
 
 	var ignorer *ignore.Ignore
 	if !noIgnore {
+		var iFactory = *ignore.NewIgnoreFactory()
 		cwd, err := os.Getwd()
 		if err != nil {
 			return err
 		}
-		fs, err := ignore.GetRootGitDir(cwd)
+		fs, err := iFactory.GetRootGitDir(cwd)
 		if err != nil {
 			return err
 		}
-		ignorer, err = ignore.NewIgnore(fs, cfg.IgnoreFiles)
+		ignorer, err = iFactory.NewIgnore(fs, cfg.IgnoreFiles)
 		if err != nil {
 			return err
 		}
