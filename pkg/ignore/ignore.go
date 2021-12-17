@@ -56,11 +56,6 @@ func getDomainFromWorkingDir(workingDir, gitRoot string) []string {
 	return []string{}
 }
 
-// var (
-// 	filepathAbs = filepath.Abs
-// 	osGetwd     = os.Getwd
-// )
-
 func (iFactory *IgnoreFactory) GetRootGitDir(workingDir string) (filesystem billy.Filesystem, err error) {
 	dir, err := iFactory.filepathAbs(workingDir)
 	if err != nil {
