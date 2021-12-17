@@ -19,6 +19,7 @@ type Ignore struct {
 	matcher gitignore.Matcher
 }
 
+// IgnoreFactory defines dependency functions so it's much easier to mock during testing
 type IgnoreFactory struct {
 	filepathAbs func(path string) (string, error)
 	osGetwd     func() (string, error)
@@ -31,6 +32,7 @@ var defaultIgnoreFiles = []string{
 	".git/info/exclude",
 }
 
+// Default dependency function definitions
 func NewIgnoreFactory() (iFactory *IgnoreFactory) {
 	return &IgnoreFactory{
 		filepathAbs: filepath.Abs,

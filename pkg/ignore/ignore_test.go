@@ -143,6 +143,7 @@ func (suite *IgnoreTestSuite) TestGetRootGitDirNotExist() {
 }
 
 func (suite *IgnoreTestSuite) TestGetRootGitDirInvalid() {
+	// mock filepath.Abs() with one that throws error, then revert back to it
 	defer func() {
 		suite.factory.filepathAbs = filepath.Abs
 	}()
@@ -152,6 +153,7 @@ func (suite *IgnoreTestSuite) TestGetRootGitDirInvalid() {
 }
 
 func (suite *IgnoreTestSuite) TestNewIgnoreWithOSErr() {
+	// mock os.Getwd() with one that throws error, then revert back to it
 	defer func() {
 		suite.factory.osGetwd = os.Getwd
 	}()
